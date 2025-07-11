@@ -25,10 +25,10 @@
     "server"
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.6.1",
+    "@modelcontextprotocol/sdk": "^1.15.1",
     "dotenv": "^16.6.1",
     "pocketbase": "^0.26.1",
-    "yargs": "^17.7.2"
+    "yargs": "^18.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
