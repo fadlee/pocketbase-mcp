@@ -172,6 +172,40 @@ export const myToolSchema = {
 };
 ```
 
+### Select Field Creation Best Practices
+
+When creating select fields in collections, follow this exact format:
+
+```typescript
+ {
+   "hidden": false,
+   "id": "select4139270797",
+   "maxSelect": 1,
+   "name": "status_select",
+   "presentable": false,
+   "required": false,
+   "type": "select",
+   "values": [
+     "active",
+     "inactive",
+     "maintenance",
+     "retired",
+     "disposed"
+   ]
+ }
+ ```
+
+**Key Properties for Select Fields:**
+ - `hidden`: Whether the field is hidden in the UI
+ - `id`: Unique identifier for the field
+ - `maxSelect`: Maximum number of selections (1 for single select, >1 for multi-select)
+ - `name`: Field name
+ - `presentable`: Whether the field can be used as a presentable field
+ - `required`: Whether the field is required
+ - `type`: Must be "select"
+ - `values`: Array of available options
+```
+
 ## Testing Your New Tool
 
 1. **Build the project**:

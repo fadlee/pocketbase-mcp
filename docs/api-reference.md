@@ -33,10 +33,47 @@ Create a new collection in PocketBase.
       "name": "price",
       "type": "number",
       "required": true
-    }
+    },
+    {
+       "hidden": false,
+       "id": "select4139270797",
+       "maxSelect": 1,
+       "name": "status_select",
+       "presentable": false,
+       "required": false,
+       "type": "select",
+       "values": [
+         "active",
+         "inactive",
+         "maintenance",
+         "retired",
+         "disposed"
+       ]
+     }
   ]
 }
 ```
+
+**Select Field Format:**
+ When creating select fields, use this exact structure:
+ ```typescript
+ {
+   "hidden": false,
+   "id": "select4139270797",
+   "maxSelect": 1,
+   "name": "status_select",
+   "presentable": false,
+   "required": false,
+   "type": "select",
+   "values": [
+     "active",
+     "inactive",
+     "maintenance",
+     "retired",
+     "disposed"
+   ]
+ }
+ ```
 
 #### `list_collections`
 Retrieve a list of all collections.

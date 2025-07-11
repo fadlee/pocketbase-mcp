@@ -68,21 +68,6 @@ export const createCollectionSchema = {
             type: "string",
             description: "Pattern for autogenerating field values (for text fields)",
           },
-          options: {
-            type: "object",
-            description: "Field-specific options",
-            properties: {
-              values: {
-                type: "array",
-                description: "Predefined values for select fields",
-                items: { type: "string" },
-              },
-              maxSelect: {
-                type: "number",
-                description: "Maximum number of selectable options",
-              },
-            },
-          },
           collectionId: {
             type: "string",
             description: "Target collection ID for relation fields",
@@ -93,7 +78,7 @@ export const createCollectionSchema = {
           },
           maxSelect: {
             type: "number",
-            description: "Maximum number of relations (1 for single relation, > 1 for multiple)",
+            description: "Maximum number of relations or select options (1 for single relation, > 1 for multiple)",
           },
           onCreate: {
             type: "boolean",
@@ -110,6 +95,15 @@ export const createCollectionSchema = {
           hidden: {
             type: "boolean",
             description: "Whether the field is hidden in the UI",
+          },
+          values: {
+            type: "array",
+            description: "Predefined values for select fields (direct property)",
+            items: { type: "string" },
+          },
+          id: {
+            type: "string",
+            description: "Unique identifier for the field",
           },
         },
         required: ["name", "type"],

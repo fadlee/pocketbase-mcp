@@ -30,10 +30,6 @@ export interface CollectionFieldConfig {
   max?: number;
   pattern?: string;
   autogeneratePattern?: string;
-  options?: {
-    values?: string[];
-    maxSelect?: number;
-  };
   collectionId?: string;
   cascadeDelete?: boolean;
   maxSelect?: number;
@@ -41,6 +37,8 @@ export interface CollectionFieldConfig {
   onUpdate?: boolean;
   presentable?: boolean;
   hidden?: boolean;
+  values?: string[];
+  id?: string;
 }
 
 export interface CreateCollectionArgs {
