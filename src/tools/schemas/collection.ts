@@ -186,3 +186,14 @@ export const listCollectionsSchema = {
   },
   required: [],
 };
+
+export const truncateCollectionSchema = {
+  type: "object",
+  properties: {
+    collection: {
+      type: "string",
+      description: "Collection name or ID to truncate (delete all records)",
+    },
+  },
+  required: ["collection"],
+};

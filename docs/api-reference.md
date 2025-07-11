@@ -100,6 +100,19 @@ Get schema details for a collection.
 **Parameters:**
 - `collection` (string, required): Collection name
 
+#### `truncate_collection`
+Delete all records associated with the specified collection.
+
+**Parameters:**
+- `collection` (string, required): Collection name or ID to truncate
+
+**Example:**
+```typescript
+{
+  "collection": "products"
+}
+```
+
 ### Record Operations
 
 #### `create_record`

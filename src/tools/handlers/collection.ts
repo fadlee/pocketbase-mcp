@@ -1,5 +1,5 @@
 import type PocketBase from "pocketbase";
-import type { ToolHandler, CreateCollectionArgs } from "../../types/index.js";
+import type { ToolHandler, CreateCollectionArgs, UpdateCollectionArgs, TruncateCollectionArgs } from "../../types/index.js";
 import { handlePocketBaseError } from "../../utils/errors.js";
 import { createJsonResponse } from "../../utils/response.js";
 
@@ -26,9 +26,9 @@ export function createDeleteCollectionHandler(pb: PocketBase): ToolHandler {
   return async (args: { collection: string }) => {
     try {
       await pb.collections.delete(args.collection);
-      return createJsonResponse({ 
-        success: true, 
-        message: `Collection '${args.collection}' deleted successfully` 
+      return createJsonResponse({
+        success: true,
+        message: `Collection '${args.collection}' deleted successfully`
       });
     } catch (error: unknown) {
       throw handlePocketBaseError("delete collection", error);
@@ -56,12 +56,29 @@ export function createGetCollectionSchemaHandler(pb: PocketBase): ToolHandler {
 export function createListCollectionsHandler(pb: PocketBase): ToolHandler {
   return async (args: { sort?: string }) => {
     try {
-      const result = await pb.collections.getFullList({ 
-        sort: args.sort || "-created" 
+      const result = await pb.collections.getFullList({
+        sort: args.sort || "-created"
       });
       return createJsonResponse(result);
     } catch (error: unknown) {
       throw handlePocketBaseError("list collections", error);
+    }
+  };
+}
+
+/**
+ * Truncate all records from a collection
+ */
+export function createTruncateCollectionHandler(pb: PocketBase): ToolHandler {
+  return async (args: TruncateCollectionArgs) => {
+    try {
+      await pb.collections.truncate(args.collection);
+      return createJsonResponse({
+        success: true,
+        message: `All records in collection '${args.collection}' have been deleted`
+      });
+    } catch (error: unknown) {
+      throw handlePocketBaseError("truncate collection", error);
     }
   };
 }

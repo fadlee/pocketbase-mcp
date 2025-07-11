@@ -14,6 +14,7 @@ import {
   deleteCollectionSchema,
   getCollectionSchemaSchema,
   listCollectionsSchema,
+  truncateCollectionSchema,
   createRecordSchema,
   listRecordsSchema,
   updateRecordSchema,
@@ -39,6 +40,7 @@ import {
   createDeleteCollectionHandler,
   createGetCollectionSchemaHandler,
   createListCollectionsHandler,
+  createTruncateCollectionHandler,
   createCreateRecordHandler,
   createListRecordsHandler,
   createUpdateRecordHandler,
@@ -112,6 +114,12 @@ export function createServer(config: ServerConfig): Server {
       inputSchema: listCollectionsSchema,
       handler: createListCollectionsHandler(pb),
     },
+    {
+      name: "truncate_collection",
+      description: "Delete all records associated with the specified collection",
+      inputSchema: truncateCollectionSchema,
+      handler: createTruncateCollectionHandler(pb),
+    },
 
     // Record tools
     {
@@ -170,7 +178,7 @@ export function createServer(config: ServerConfig): Server {
     // Migration tools
     {
       name: "migrate_collection",
-      description: "Migrate collection schema with data preservation",
+      description: "Add, remove, or modify fields from a collection",
       inputSchema: migrateCollectionSchema,
       handler: createMigrateCollectionHandler(pb),
     },

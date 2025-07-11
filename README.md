@@ -70,7 +70,7 @@ Analyze the "products" collection and provide insights
 
 ## 🛠️ Available Tools
 
-**Collection Management**: `create_collection`, `list_collections`, `delete_collection`, `get_collection_schema`, `migrate_collection`
+**Collection Management**: `create_collection`, `list_collections`, `delete_collection`, `get_collection_schema`, `update_collection`, `truncate_collection`, `migrate_collection`
 
 **Record Operations**: `create_record`, `list_records`, `update_record`, `delete_record`, `query_collection`
 

@@ -58,6 +58,28 @@ export interface CreateCollectionArgs {
   };
 }
 
+export interface UpdateCollectionArgs {
+  collection: string;
+  name?: string;
+  type?: "base" | "auth" | "view";
+  fields?: CollectionFieldConfig[];
+  listRule?: string;
+  viewRule?: string;
+  createRule?: string;
+  updateRule?: string;
+  deleteRule?: string;
+  indexes?: string[];
+  viewQuery?: string;
+  passwordAuth?: {
+    enabled: boolean;
+    identityFields: string[];
+  };
+}
+
+export interface TruncateCollectionArgs {
+  collection: string;
+}
+
 // Record related types
 export interface CreateRecordArgs {
   collection: string;

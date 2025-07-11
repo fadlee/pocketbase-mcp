@@ -8,6 +8,7 @@ export {
   deleteCollectionSchema,
   getCollectionSchemaSchema,
   listCollectionsSchema,
+  truncateCollectionSchema,
 } from "./collection.js";
 
 // Record schemas
