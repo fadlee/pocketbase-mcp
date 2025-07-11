@@ -1,5 +1,5 @@
-import { parseCliArgs, CLIConfig } from "./cli.ts";
-import { loadEnvironmentConfig, EnvironmentConfig } from "./environment.ts";
+import { parseCliArgs, CLIConfig } from "./cli.js";
+import { loadEnvironmentConfig, EnvironmentConfig } from "./environment.js";
 
 export interface ServerConfig {
   url: string;
@@ -20,7 +20,7 @@ export function createServerConfig(): ServerConfig {
 
   // Prioritize CLI args over environment variables
   const url = cliConfig.url || envConfig.pocketbaseUrl;
-
+  
   if (!url) {
     throw new Error(
       "PocketBase URL is required. Provide it via --url parameter or POCKETBASE_URL environment variable."

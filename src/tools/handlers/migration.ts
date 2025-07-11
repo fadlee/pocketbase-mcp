@@ -5,9 +5,9 @@ import type {
   BackupDatabaseArgs,
   ImportDataArgs,
   ManageIndexesArgs
-} from "../../types/index.ts";
-import { handlePocketBaseError } from "../../utils/errors.ts";
-import { createJsonResponse, createTextResponse, formatCsvData } from "../../utils/response.ts";
+} from "../../types/index.js";
+import { handlePocketBaseError } from "../../utils/errors.js";
+import { createJsonResponse, createTextResponse, formatCsvData } from "../../utils/response.js";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 
 /**

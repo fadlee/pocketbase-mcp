@@ -1,4 +1,4 @@
-import type { ToolResponse } from "../types/index.ts";
+import type { ToolResponse } from "../types/index.js";
 
 /**
  * Create a standardized tool response with JSON content
@@ -52,16 +52,16 @@ export function formatCsvData(
   ]>
 ): ToolResponse {
   let csv = "";
-
+  
   for (const [collectionName, data] of collections) {
     csv += `Collection: ${collectionName}\n`;
     csv += `Schema:\n${JSON.stringify(data.schema, null, 2)}\n`;
     csv += "Records:\n";
-
+    
     if (data.records.length > 0) {
       const headers = Object.keys(data.records[0]);
       csv += `${headers.join(",")}\n`;
-
+      
       data.records.forEach((record) => {
         const values = headers.map((header) => {
           const value = record[header];
@@ -74,6 +74,6 @@ export function formatCsvData(
     }
     csv += "\n";
   }
-
+  
   return createTextResponse(csv);
 }

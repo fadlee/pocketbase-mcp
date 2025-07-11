@@ -9,7 +9,7 @@ export {
   getCollectionSchemaSchema,
   listCollectionsSchema,
   truncateCollectionSchema,
-} from "./collection.ts";
+} from "./collection.js";
 
 // Record schemas
 export {
@@ -17,19 +17,19 @@ export {
   listRecordsSchema,
   updateRecordSchema,
   deleteRecordSchema,
-} from "./record.ts";
+} from "./record.js";
 
 // Auth schemas
 export {
   authenticateUserSchema,
   createUserSchema,
-} from "./auth.ts";
+} from "./auth.js";
 
 // Analysis schemas
 export {
   analyzeCollectionDataSchema,
   queryCollectionSchema,
-} from "./analysis.ts";
+} from "./analysis.js";
 
 // Migration schemas
 export {
@@ -37,17 +37,17 @@ export {
   backupDatabaseSchema,
   importDataSchema,
   manageIndexesSchema,
-} from "./migration.ts";
+} from "./migration.js";
 
 // Generation schemas
 export {
   generatePbSchemaSchema,
   generateTypescriptInterfacesSchema,
-} from "./generation.ts";
+} from "./generation.js";
 
 // File schemas
 export {
   uploadFileSchema,
   downloadFileSchema,
   uploadFileFromUrlSchema,
-} from "./file.ts";
+} from "./file.js";

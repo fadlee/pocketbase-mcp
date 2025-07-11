@@ -3,7 +3,7 @@
  */
 
 // Export all schemas
-export * from "./schemas/index.ts";
+export * from "./schemas/index.js";
 
 // Export all handlers
-export * from "./handlers/index.ts";
+export * from "./handlers/index.js";

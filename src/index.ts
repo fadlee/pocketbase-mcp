@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-import { createServerConfig } from "./config/index.ts";
-import { startServer } from "./server.ts";
+import { createServerConfig } from "./config/index.js";
+import { startServer } from "./server.js";
 
 // Main entry point
 async function main(): Promise<void> {
   try {
     // Create server configuration from CLI args and environment
     const config = createServerConfig();
-
+    
     // Start the MCP server
     await startServer(config);
   } catch (error) {

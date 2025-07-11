@@ -25,7 +25,7 @@
     "server"
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.15.1",
+    "@modelcontextprotocol/sdk": "^0.6.1",
     "dotenv": "^16.6.1",
     "pocketbase": "^0.26.1",
     "yargs": "^17.7.2"
