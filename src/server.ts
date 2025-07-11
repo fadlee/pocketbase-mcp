@@ -5,8 +5,8 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import PocketBase from "pocketbase";
-import type { ServerConfig } from "./config/index.js";
-import { handlePocketBaseError } from "./utils/errors.js";
+import type { ServerConfig } from "./config/index.ts";
+import { handlePocketBaseError } from "./utils/errors.ts";
 
 // Import all schemas
 import {
@@ -32,7 +32,7 @@ import {
   uploadFileSchema,
   downloadFileSchema,
   uploadFileFromUrlSchema,
-} from "./tools/index.js";
+} from "./tools/index.ts";
 
 // Import all handlers
 import {
@@ -58,7 +58,7 @@ import {
   createUploadFileHandler,
   createDownloadFileHandler,
   createUploadFileFromUrlHandler,
-} from "./tools/index.js";
+} from "./tools/index.ts";
 
 /**
  * Create and configure the MCP server

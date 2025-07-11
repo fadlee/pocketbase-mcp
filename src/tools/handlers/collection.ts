@@ -1,7 +1,7 @@
 import type PocketBase from "pocketbase";
-import type { ToolHandler, CreateCollectionArgs, UpdateCollectionArgs, TruncateCollectionArgs } from "../../types/index.js";
-import { handlePocketBaseError } from "../../utils/errors.js";
-import { createJsonResponse } from "../../utils/response.js";
+import type { ToolHandler, CreateCollectionArgs, UpdateCollectionArgs, TruncateCollectionArgs } from "../../types/index.ts";
+import { handlePocketBaseError } from "../../utils/errors.ts";
+import { createJsonResponse } from "../../utils/response.ts";
 
 /**
  * Create a new collection in PocketBase

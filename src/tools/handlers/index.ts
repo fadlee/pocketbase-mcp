@@ -9,7 +9,7 @@ export {
   createGetCollectionSchemaHandler,
   createListCollectionsHandler,
   createTruncateCollectionHandler,
-} from "./collection.js";
+} from "./collection.ts";
 
 // Record handlers
 export {
@@ -17,19 +17,19 @@ export {
   createListRecordsHandler,
   createUpdateRecordHandler,
   createDeleteRecordHandler,
-} from "./record.js";
+} from "./record.ts";
 
 // Auth handlers
 export {
   createAuthenticateUserHandler,
   createCreateUserHandler,
-} from "./auth.js";
+} from "./auth.ts";
 
 // Analysis handlers
 export {
   createAnalyzeCollectionDataHandler,
   createQueryCollectionHandler,
-} from "./analysis.js";
+} from "./analysis.ts";
 
 // Migration handlers
 export {
@@ -37,13 +37,13 @@ export {
   createBackupDatabaseHandler,
   createImportDataHandler,
   createManageIndexesHandler,
-} from "./migration.js";
+} from "./migration.ts";
 
 // Generation handlers
 export {
   createGeneratePbSchemaHandler,
   createGenerateTypescriptInterfacesHandler,
-} from "./generation.js";
+} from "./generation.ts";
 
 // File handlers
 export {

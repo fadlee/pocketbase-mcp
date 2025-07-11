@@ -12,6 +12,9 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "rootDir": ".",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "emitDeclarationOnly": true,
     "types": [
       "node"
     ]

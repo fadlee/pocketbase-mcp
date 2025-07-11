@@ -206,7 +206,7 @@ Test complete workflows with real PocketBase instances:
 // tests/integration/tools/collection.test.ts
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import PocketBase from 'pocketbase';
-import { createServer } from '../../../src/server.js';
+import { createServer } from '../../../src/server.ts';
 
 describe('Collection Tools Integration', () => {
   let pb: PocketBase;
