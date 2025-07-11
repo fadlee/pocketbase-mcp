@@ -43,3 +43,10 @@ export {
   createGeneratePbSchemaHandler,
   createGenerateTypescriptInterfacesHandler,
 } from "./generation.js";
+
+// File handlers
+export {
+  createUploadFileHandler,
+  createDownloadFileHandler,
+  createUploadFileFromUrlHandler
+} from './file.js';

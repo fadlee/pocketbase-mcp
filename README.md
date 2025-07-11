@@ -80,6 +80,8 @@ Analyze the "products" collection and provide insights
 
 **Analysis**: `analyze_collection_data`, `backup_database`, `import_data`
 
+**File Management**: `upload_file`, `download_file`, `upload_file_from_url`
+
 **Advanced**: `manage_indexes`
 
 > 📖 **[Complete API Reference →](./docs/api-reference.md)**

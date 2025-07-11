@@ -176,5 +176,28 @@ export interface GenerateTypescriptInterfacesArgs {
   };
 }
 
+// File related types
+export interface UploadFileArgs {
+  collection: string;
+  recordId: string;
+  fileField: string;
+  fileContent: string;
+  fileName: string;
+}
+
+export interface DownloadFileArgs {
+  collection: string;
+  recordId: string;
+  fileField: string;
+}
+
+export interface UploadFileFromUrlArgs {
+  collection: string;
+  recordId: string;
+  fileField: string;
+  url: string;
+  fileName?: string;
+}
+
 // Re-export PocketBase types
 export type { CollectionModel, CollectionField };

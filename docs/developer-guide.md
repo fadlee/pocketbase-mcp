@@ -187,6 +187,105 @@ export const myToolSchema = {
 3. **Verify tool registration**:
    The tool should appear in the MCP tool list when connected to your MCP client.
 
+## Complete Example: Adding a `count_records` Tool
+
+Here's a complete walkthrough of adding a new tool that counts records in a collection:
+
+### 1. Define the Schema
+
+```typescript
+// src/tools/schemas/analysis.ts
+export const countRecordsSchema = {
+  type: 'object',
+  properties: {
+    collection: {
+      type: 'string',
+      description: 'Collection name to count records from'
+    },
+    filter: {
+      type: 'string',
+      description: 'Optional filter to apply when counting'
+    }
+  },
+  required: ['collection']
+} as const;
+```
+
+## File Handling Tools Implementation
+
+The recently added file handling tools (`upload_file`, `download_file`, and `upload_file_from_url`) demonstrate advanced patterns:
+
+### Key Implementation Details
+
+1. **File Upload with FormData**: Uses `FormData` and `Blob` for file uploads
+2. **File URL Generation**: Uses `pb.files.getUrl()` for download URLs
+3. **File Upload from URL**: Downloads files from URLs and uploads to PocketBase
+4. **MIME Type Handling**: Automatic file extension detection from MIME types
+5. **Type Safety**: Proper TypeScript interfaces for file operations
+6. **Error Handling**: Validates file field existence and content
+
+### File Upload Pattern
+
+```typescript
+// Create a Blob from file content
+const blob = new Blob([fileContent]);
+
+// Use FormData for file upload
+const formData = new FormData();
+formData.append(fileField, blob, fileName);
+
+// Update record with file
+const record = await pb.collection(collection).update(recordId, formData);
+```
+
+### File Download Pattern
+
+```typescript
+// Get record with file field
+const record = await pb.collection(collection).getOne(recordId);
+
+// Generate download URL
+const fileUrl = pb.files.getUrl(record, fileName);
+```
+
+### File Upload from URL Pattern
+
+```typescript
+// Download file from URL
+const response = await fetch(url);
+const arrayBuffer = await response.arrayBuffer();
+
+// Get MIME type and determine file extension
+const mimeType = response.headers.get('content-type') || 'application/octet-stream';
+const extension = getExtensionFromMimeType(mimeType);
+const fileName = customFileName || `file_${Date.now()}${extension}`;
+
+// Create blob and upload
+const blob = new Blob([arrayBuffer], { type: mimeType });
+const formData = new FormData();
+formData.append(fileField, blob, fileName);
+const record = await pb.collection(collection).update(recordId, formData);
+```
+
+### MIME Type to Extension Mapping
+
+```typescript
+function getExtensionFromMimeType(mimeType: string): string {
+  const mimeToExt: Record<string, string> = {
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/gif': '.gif',
+    'image/webp': '.webp',
+    'application/pdf': '.pdf',
+    'text/plain': '.txt',
+    'application/json': '.json',
+    'text/csv': '.csv',
+    // Add more mappings as needed
+  };
+  return mimeToExt[mimeType] || '';
+}
+```
+
 ## Example: Complete Tool Implementation
 
 Here's a complete example of adding a `count_records` tool:

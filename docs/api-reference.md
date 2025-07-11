@@ -248,6 +248,67 @@ Generate TypeScript interfaces from PocketBase collections.
 - `options` (object, optional): Generation options
   - `includeRelations` (boolean): Include relation types
 
+### File Management
+
+#### `upload_file`
+Upload a file to a record in PocketBase.
+
+**Parameters:**
+- `collection` (string, required): Collection name
+- `recordId` (string, required): Record ID to attach file to
+- `fileField` (string, required): File field name in collection schema
+- `fileContent` (string, required): Raw file content as string
+- `fileName` (string, required): Desired file name
+
+**Example:**
+```typescript
+{
+  "collection": "documents",
+  "recordId": "abc123",
+  "fileField": "attachment",
+  "fileContent": "This is the content of my document",
+  "fileName": "my-document.txt"
+}
+```
+
+#### `download_file`
+Get the URL to download a file from a PocketBase record.
+
+**Parameters:**
+- `collection` (string, required): Collection name
+- `recordId` (string, required): Record ID containing the file
+- `fileField` (string, required): File field name
+
+**Example:**
+```typescript
+{
+  "collection": "documents",
+  "recordId": "abc123",
+  "fileField": "attachment"
+}
+```
+
+#### `upload_file_from_url`
+Download a file from a URL and upload it to a PocketBase record.
+
+**Parameters:**
+- `collection` (string, required): Collection name
+- `recordId` (string, required): Record ID to attach file to
+- `fileField` (string, required): File field name in collection schema
+- `url` (string, required): URL to download the file from
+- `fileName` (string, optional): Custom name for the uploaded file (if not provided, will extract from URL)
+
+**Example:**
+```typescript
+{
+  "collection": "documents",
+  "recordId": "abc123",
+  "fileField": "attachment",
+  "url": "https://example.com/files/document.pdf",
+  "fileName": "my-document.pdf"
+}
+```
+
 ## Response Formats
 
 ### Success Response

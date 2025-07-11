@@ -28,6 +28,9 @@ import {
   manageIndexesSchema,
   generatePbSchemaSchema,
   generateTypescriptInterfacesSchema,
+  uploadFileSchema,
+  downloadFileSchema,
+  uploadFileFromUrlSchema,
 } from "./tools/index.js";
 
 // Import all handlers
@@ -50,6 +53,9 @@ import {
   createManageIndexesHandler,
   createGeneratePbSchemaHandler,
   createGenerateTypescriptInterfacesHandler,
+  createUploadFileHandler,
+  createDownloadFileHandler,
+  createUploadFileFromUrlHandler,
 } from "./tools/index.js";
 
 /**
@@ -199,6 +205,26 @@ export function createServer(config: ServerConfig): Server {
       description: "Generate TypeScript interfaces from PocketBase collections",
       inputSchema: generateTypescriptInterfacesSchema,
       handler: createGenerateTypescriptInterfacesHandler(pb),
+    },
+
+    // File tools
+    {
+      name: "upload_file",
+      description: "Upload a file to a record in PocketBase",
+      inputSchema: uploadFileSchema,
+      handler: createUploadFileHandler(pb),
+    },
+    {
+      name: "download_file",
+      description: "Download a file from a record in PocketBase",
+      inputSchema: downloadFileSchema,
+      handler: createDownloadFileHandler(pb),
+    },
+    {
+      name: "upload_file_from_url",
+      description: "Upload a file from URL to a record in PocketBase",
+      inputSchema: uploadFileFromUrlSchema,
+      handler: createUploadFileFromUrlHandler(pb),
     },
   ];
 

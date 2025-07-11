@@ -43,3 +43,10 @@ export {
   generatePbSchemaSchema,
   generateTypescriptInterfacesSchema,
 } from "./generation.js";
+
+// File schemas
+export {
+  uploadFileSchema,
+  downloadFileSchema,
+  uploadFileFromUrlSchema,
+} from "./file.js";
