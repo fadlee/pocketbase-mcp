@@ -13,6 +13,7 @@ import {
   createCollectionSchema,
   deleteCollectionSchema,
   getCollectionSchemaSchema,
+  listCollectionsSchema,
   createRecordSchema,
   listRecordsSchema,
   updateRecordSchema,
@@ -34,6 +35,7 @@ import {
   createCreateCollectionHandler,
   createDeleteCollectionHandler,
   createGetCollectionSchemaHandler,
+  createListCollectionsHandler,
   createCreateRecordHandler,
   createListRecordsHandler,
   createUpdateRecordHandler,
@@ -97,6 +99,12 @@ export function createServer(config: ServerConfig): Server {
       description: "Get schema details for a collection",
       inputSchema: getCollectionSchemaSchema,
       handler: createGetCollectionSchemaHandler(pb),
+    },
+    {
+      name: "list_collections",
+      description: "List all collections with optional sorting",
+      inputSchema: listCollectionsSchema,
+      handler: createListCollectionsHandler(pb),
     },
 
     // Record tools

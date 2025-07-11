@@ -180,3 +180,15 @@ export const getCollectionSchemaSchema = {
   },
   required: ["collection"],
 };
+
+export const listCollectionsSchema = {
+  type: "object",
+  properties: {
+    sort: {
+      type: "string",
+      description: "Sort order for collections (e.g., '-created', 'name')",
+      default: "-created",
+    },
+  },
+  required: [],
+};

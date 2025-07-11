@@ -7,6 +7,7 @@ export {
   createCreateCollectionHandler,
   createDeleteCollectionHandler,
   createGetCollectionSchemaHandler,
+  createListCollectionsHandler,
 } from "./collection.js";
 
 // Record handlers

@@ -49,3 +49,19 @@ export function createGetCollectionSchemaHandler(pb: PocketBase): ToolHandler {
     }
   };
 }
+
+/**
+ * List all collections
+ */
+export function createListCollectionsHandler(pb: PocketBase): ToolHandler {
+  return async (args: { sort?: string }) => {
+    try {
+      const result = await pb.collections.getFullList({ 
+        sort: args.sort || "-created" 
+      });
+      return createJsonResponse(result);
+    } catch (error: unknown) {
+      throw handlePocketBaseError("list collections", error);
+    }
+  };
+}
