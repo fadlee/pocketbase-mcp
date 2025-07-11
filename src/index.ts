@@ -7,7 +7,8 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import PocketBase, { CollectionModel, SchemaField } from "pocketbase";
+import PocketBase from "pocketbase";
+import type { CollectionModel, CollectionField } from "pocketbase";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import dotenv from "dotenv";
@@ -1121,10 +1122,10 @@ class PocketBaseServer {
           ...fieldAnalysis,
           uniqueValueCount: fieldAnalysis.uniqueValues.size,
           fillRate:
-            (
+            `${(
               (fieldAnalysis.nonNullValues / records.items.length) *
               100
-            ).toFixed(2) + "%",
+            ).toFixed(2)}%`,
           uniqueValues: undefined, // Remove the Set before serializing
         };
 
@@ -1444,19 +1445,19 @@ class PocketBaseServer {
         let csv = "";
         for (const [collectionName, data] of Object.entries(backup) as [
           string,
-          { schema: SchemaField[]; records: Record<string, any>[] }
+          { schema: CollectionField[]; records: Record<string, any>[] }
         ][]) {
           csv += `Collection: ${collectionName}\n`;
           csv += `Schema:\n${JSON.stringify(data.schema, null, 2)}\n`;
           csv += "Records:\n";
           if (data.records.length > 0) {
             const headers = Object.keys(data.records[0]);
-            csv += headers.join(",") + "\n";
+            csv += `${headers.join(",")}\n`;
             data.records.forEach((record) => {
               csv +=
-                headers
+                `${headers
                   .map((header) => JSON.stringify(record[header]))
-                  .join(",") + "\n";
+                  .join(",")}\n`;
             });
           }
           csv += "\n";
@@ -1490,7 +1491,7 @@ class PocketBaseServer {
       const results = [];
 
       for (const record of args.data) {
-        let result;
+        let result: any;
         switch (mode) {
           case "create":
             result = await collection.create(record);
@@ -1637,7 +1638,7 @@ class PocketBaseServer {
 
       const records = await collection.getList(1, 100, options);
 
-      let result: any = { items: records.items };
+      const result: any = { items: records.items };
 
       if (args.aggregate) {
         const aggregations: any = {};
@@ -1649,7 +1650,7 @@ class PocketBaseServer {
             case "sum":
               aggregations[name] = records.items.reduce(
                 (sum: number, record: any) =>
-                  sum + (parseFloat(record[cleanField]) || 0),
+                  sum + (Number.parseFloat(record[cleanField]) || 0),
                 0
               );
               break;
@@ -1657,7 +1658,7 @@ class PocketBaseServer {
               aggregations[name] =
                 records.items.reduce(
                   (sum: number, record: any) =>
-                    sum + (parseFloat(record[cleanField]) || 0),
+                    sum + (Number.parseFloat(record[cleanField]) || 0),
                   0
                 ) / records.items.length;
               break;
@@ -1695,10 +1696,10 @@ class PocketBaseServer {
     try {
       const collection = await this.pb.collections.getOne(args.collection);
       const currentIndexes: string[] = collection.indexes || [];
-      let result;
+      let result: any;
 
       switch (args.action) {
-        case "create":
+        case "create": {
           if (!args.index) {
             throw new McpError(
               ErrorCode.InvalidParams,
@@ -1714,8 +1715,9 @@ class PocketBaseServer {
           );
           result = updatedCollection.indexes;
           break;
+        }
 
-        case "delete":
+        case "delete": {
           if (!args.index) {
             throw new McpError(
               ErrorCode.InvalidParams,
@@ -1734,6 +1736,7 @@ class PocketBaseServer {
           );
           result = collectionAfterDelete.indexes;
           break;
+        }
 
         case "list":
           result = currentIndexes;
