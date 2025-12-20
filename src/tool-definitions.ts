@@ -8,6 +8,7 @@ export function getToolDefinitions(): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {},
+        additionalProperties: false,
       },
     },
     {
@@ -16,6 +17,7 @@ export function getToolDefinitions(): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {},
+        additionalProperties: false,
       },
     },
     {
@@ -39,6 +41,7 @@ export function getToolDefinitions(): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {},
+        additionalProperties: false,
       },
     },
     {
@@ -168,6 +171,7 @@ export function getToolDefinitions(): Tool[] {
       inputSchema: {
         type: 'object',
         properties: {},
+        additionalProperties: false,
       },
     },
     {
