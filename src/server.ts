@@ -140,8 +140,22 @@ export class PocketBaseMCPServer {
     return this.http.request<HealthResponse>('GET', '/api/health');
   }
 
-  async listCollections(): Promise<ListResult<Collection>> {
-    return this.http.request<ListResult<Collection>>('GET', '/api/collections');
+  async listCollections() {
+    const result = await this.http.request<ListResult<Collection>>('GET', '/api/collections');
+    
+    return {
+      page: result.page,
+      perPage: result.perPage,
+      totalItems: result.totalItems,
+      totalPages: result.totalPages,
+      items: result.items.map((col) => ({
+        id: col.id,
+        name: col.name,
+        type: col.type,
+        fields: col.fields?.length || 0,
+        system: col.system || false,
+      })),
+    };
   }
 
   async viewCollection(collection: string): Promise<Collection> {
