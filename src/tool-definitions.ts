@@ -120,11 +120,19 @@ export function getToolDefinitions(): Tool[] {
             type: 'array',
             description:
               'Optional shorthand to update the collection fields (schema). Must be the full fields array (existing + changes).',
+            items: {
+              type: 'object',
+              description: 'Field definition object',
+            },
           },
           indexes: {
             type: 'array',
             description:
               'Optional indexes definitions. Note that view collections may not support indexes.',
+            items: {
+              type: 'string',
+              description: 'SQL CREATE INDEX statement',
+            },
           },
           listRule: {
             type: ['string', 'null'],
