@@ -1,8 +1,6 @@
 export interface PocketBaseConfig {
   baseUrl: string;
   token?: string;
-  email?: string;
-  password?: string;
 }
 
 export interface CollectionField {
@@ -120,4 +118,15 @@ export interface UpdateRecordArgs {
 export interface DeleteRecordArgs {
   collection: string;
   id: string;
+}
+
+export interface AuthAdminArgs {
+  identity: string;
+  password: string;
+}
+
+export interface AuthUserArgs {
+  collection: string;
+  identity: string;
+  password: string;
 }

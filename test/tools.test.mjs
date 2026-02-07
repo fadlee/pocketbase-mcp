@@ -34,7 +34,7 @@ function parseRecordIdFromPath(endpoint) {
 
 function createServerWithMockRequest() {
   const calls = [];
-  const server = new PocketBaseMCPServer('http://localhost:8090', 'test-token');
+  const server = new PocketBaseMCPServer('http://localhost:8090');
 
   server.http.request = async (method, endpoint, data, query) => {
     calls.push({ method, endpoint, data, query });
@@ -55,6 +55,21 @@ function createServerWithMockRequest() {
 
     if (method === 'POST' && endpoint === '/api/collections') {
       return makeCollection(data.name, data);
+    }
+
+    if (method === 'POST' && endpoint === '/api/collections/_superusers/auth-with-password') {
+      return {
+        token: 'admin_auth_token_1234567890',
+        record: { id: 'admin_1', email: data.identity },
+      };
+    }
+
+    if (method === 'POST' && endpoint.endsWith('/auth-with-password')) {
+      const collection = parseCollectionFromPath(endpoint);
+      return {
+        token: 'user_auth_token_1234567890',
+        record: { id: 'user_1', collectionName: collection, identity: data.identity },
+      };
     }
 
     if (
@@ -135,6 +150,51 @@ test('rejects unknown tool names', async () => {
   const { server } = createServerWithMockRequest();
 
   await assert.rejects(() => server.callTool('not_a_tool', {}), /Unknown tool: not_a_tool/);
+});
+
+test('supports authentication tools happy path', async () => {
+  const { server } = createServerWithMockRequest();
+
+  const statusBefore = await server.callTool('get_auth_status', {});
+  const adminAuth = await server.callTool('auth_admin', {
+    identity: 'admin@example.com',
+    password: 'secret',
+  });
+  const statusAfterAdmin = await server.callTool('get_auth_status', {});
+  const userAuth = await server.callTool('auth_user', {
+    collection: 'users',
+    identity: 'fadlee',
+    password: 'secret',
+  });
+  const logout = await server.callTool('logout', {});
+  const statusAfterLogout = await server.callTool('get_auth_status', {});
+
+  assert.equal(statusBefore.authenticated, false);
+  assert.equal(adminAuth.authenticated, true);
+  assert.equal(adminAuth.mode, 'admin');
+  assert.equal(statusAfterAdmin.authenticated, true);
+  assert.equal(userAuth.authenticated, true);
+  assert.equal(userAuth.mode, 'user');
+  assert.equal(userAuth.collection, 'users');
+  assert.equal(logout.authenticated, false);
+  assert.equal(statusAfterLogout.authenticated, false);
+});
+
+test('validates authentication tool arguments', async () => {
+  const { server } = createServerWithMockRequest();
+
+  await assert.rejects(
+    () => server.callTool('auth_admin', { identity: 'admin@example.com' }),
+    /Missing required parameter: password/
+  );
+  await assert.rejects(
+    () =>
+      server.callTool('auth_user', {
+        identity: 'user@example.com',
+        password: 'secret',
+      }),
+    /Missing required parameter: collection/
+  );
 });
 
 test('supports collection tools happy path', async () => {

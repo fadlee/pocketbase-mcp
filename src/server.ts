@@ -1,6 +1,7 @@
 import { ValidationError } from './errors.js';
 import { HttpClient } from './http-client.js';
 import { PocketBaseApi } from './pocketbase-api.js';
+import { createAuthToolHandlers } from './tool-handlers/auth.js';
 import { createCollectionToolHandlers } from './tool-handlers/collections.js';
 import { createMetaToolHandlers } from './tool-handlers/meta.js';
 import { createRecordToolHandlers } from './tool-handlers/records.js';
@@ -10,27 +11,20 @@ import { TOOL_DEFINITIONS, type ToolName } from './tool-definitions.js';
 export class PocketBaseMCPServer {
   private readonly http: HttpClient;
   private readonly api: PocketBaseApi;
-  private readonly email?: string;
-  private readonly password?: string;
   private readonly toolHandlers: Record<ToolName, ToolHandler>;
 
-  constructor(baseUrl: string, token?: string, email?: string, password?: string) {
+  constructor(baseUrl: string, token?: string) {
     this.http = new HttpClient(baseUrl, token);
     this.api = new PocketBaseApi(this.http);
-    this.email = email;
-    this.password = password;
     this.toolHandlers = this.createToolHandlers();
   }
 
-  async initialize(): Promise<void> {
-    if (!this.http.getToken() && this.email && this.password) {
-      await this.http.authenticate(this.email, this.password);
-    }
-  }
+  async initialize(): Promise<void> {}
 
   private createToolHandlers(): Record<ToolName, ToolHandler> {
     const handlers: ToolHandlerMap = {
       ...createMetaToolHandlers({ api: this.api }),
+      ...createAuthToolHandlers({ api: this.api }),
       ...createCollectionToolHandlers({ api: this.api }),
       ...createRecordToolHandlers({ api: this.api }),
     };

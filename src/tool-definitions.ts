@@ -11,6 +11,64 @@ export const TOOL_DEFINITIONS = [
       },
     },
     {
+      name: 'auth_admin',
+      description: 'Authenticate as PocketBase admin/superuser',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          identity: {
+            type: 'string',
+            description: 'Superuser email/identity',
+          },
+          password: {
+            type: 'string',
+            description: 'Superuser password',
+          },
+        },
+        required: ['identity', 'password'],
+      },
+    },
+    {
+      name: 'auth_user',
+      description: 'Authenticate as PocketBase auth collection user',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          collection: {
+            type: 'string',
+            description: 'Auth collection name or ID',
+          },
+          identity: {
+            type: 'string',
+            description: 'User email or username',
+          },
+          password: {
+            type: 'string',
+            description: 'User password',
+          },
+        },
+        required: ['collection', 'identity', 'password'],
+      },
+    },
+    {
+      name: 'get_auth_status',
+      description: 'Check current authentication status/token state',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'logout',
+      description: 'Clear current authentication session token',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+        additionalProperties: false,
+      },
+    },
+    {
       name: 'list_collections',
       description: 'List all collections',
       inputSchema: {

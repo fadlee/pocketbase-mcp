@@ -1,4 +1,6 @@
 import type {
+  AuthAdminArgs,
+  AuthUserArgs,
   Collection,
   CreateCollectionArgs,
   CreateRecordArgs,
@@ -13,8 +15,88 @@ import type {
 import { ValidationError } from './errors.js';
 import { HttpClient } from './http-client.js';
 
+interface PocketBaseAuthResponse {
+  token?: string;
+  record?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 export class PocketBaseApi {
   constructor(private readonly http: HttpClient) {}
+
+  private getTokenPreview(token: string | null): string | null {
+    if (!token) {
+      return null;
+    }
+
+    if (token.length <= 12) {
+      return `${token.slice(0, 4)}...`;
+    }
+
+    return `${token.slice(0, 8)}...${token.slice(-4)}`;
+  }
+
+  async authAdmin(args: AuthAdminArgs) {
+    const result = await this.http.request<PocketBaseAuthResponse>(
+      'POST',
+      '/api/collections/_superusers/auth-with-password',
+      {
+        identity: args.identity,
+        password: args.password,
+      },
+      undefined,
+      false
+    );
+
+    this.http.setToken(result.token || null);
+
+    return {
+      authenticated: Boolean(result.token),
+      mode: 'admin',
+      tokenPreview: this.getTokenPreview(this.http.getToken()),
+      record: result.record ?? null,
+    };
+  }
+
+  async authUser(args: AuthUserArgs) {
+    const result = await this.http.request<PocketBaseAuthResponse>(
+      'POST',
+      `/api/collections/${encodeURIComponent(args.collection)}/auth-with-password`,
+      {
+        identity: args.identity,
+        password: args.password,
+      },
+      undefined,
+      false
+    );
+
+    this.http.setToken(result.token || null);
+
+    return {
+      authenticated: Boolean(result.token),
+      mode: 'user',
+      collection: args.collection,
+      tokenPreview: this.getTokenPreview(this.http.getToken()),
+      record: result.record ?? null,
+    };
+  }
+
+  getAuthStatus() {
+    const token = this.http.getToken();
+    return {
+      authenticated: Boolean(token),
+      tokenPreview: this.getTokenPreview(token),
+      baseUrl: this.http.getBaseUrl(),
+    };
+  }
+
+  logout() {
+    this.http.clearToken();
+    return {
+      message: 'Authentication session cleared',
+      authenticated: false,
+    };
+  }
 
   async health(): Promise<HealthResponse> {
     return this.http.request<HealthResponse>('GET', '/api/health');

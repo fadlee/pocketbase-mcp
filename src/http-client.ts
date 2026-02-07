@@ -9,12 +9,20 @@ export class HttpClient {
     this.token = token || null;
   }
 
-  setToken(token: string): void {
+  setToken(token: string | null): void {
     this.token = token;
   }
 
   getToken(): string | null {
     return this.token;
+  }
+
+  clearToken(): void {
+    this.token = null;
+  }
+
+  getBaseUrl(): string {
+    return this.baseUrl;
   }
 
   async request<T = unknown>(

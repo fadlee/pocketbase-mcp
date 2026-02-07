@@ -12,22 +12,10 @@ import { serializeError } from './errors.js';
 import { PocketBaseMCPServer } from './server.js';
 import { getToolDefinitions } from './tool-definitions.js';
 
-const POCKETBASE_URL = process.env.POCKETBASE_URL;
-const POCKETBASE_TOKEN = process.env.POCKETBASE_TOKEN;
-const POCKETBASE_EMAIL = process.env.POCKETBASE_EMAIL;
-const POCKETBASE_PASSWORD = process.env.POCKETBASE_PASSWORD;
+const DEFAULT_POCKETBASE_URL = 'http://localhost:8090';
+const POCKETBASE_URL = process.env.POCKETBASE_URL || DEFAULT_POCKETBASE_URL;
 
-if (!POCKETBASE_URL) {
-  console.error('Error: POCKETBASE_URL environment variable is required');
-  process.exit(1);
-}
-
-const pbServer = new PocketBaseMCPServer(
-  POCKETBASE_URL,
-  POCKETBASE_TOKEN,
-  POCKETBASE_EMAIL,
-  POCKETBASE_PASSWORD
-);
+const pbServer = new PocketBaseMCPServer(POCKETBASE_URL);
 
 const mcpServer = new McpServer(
   {

@@ -4,9 +4,10 @@ Model Context Protocol (MCP) server for PocketBase, enabling AI assistants to in
 
 ## Features
 
-- 🔧 **14 Tools** for complete PocketBase management
+- 🔧 **18 Tools** for complete PocketBase management
 - 📚 **Collections**: Create, update, delete, and view collections
 - 📝 **Records**: Full CRUD operations with filtering, sorting, and pagination
+- 🔐 **Authentication**: Login/logout and check auth state via tools
 - 🔐 **Rules**: Manage API access control rules
 - 📖 **References**: Built-in field schema and rules reference
 - 🌐 **Resources**: Expose collections as MCP resources
@@ -30,52 +31,32 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
   "mcpServers": {
     "pocketbase": {
       "command": "npx",
-      "args": ["@fadlee/pocketbase-mcp"],
-      "env": {
-        "POCKETBASE_URL": "http://localhost:8090",
-        "POCKETBASE_TOKEN": "your-admin-token-here"
-      }
+      "args": ["@fadlee/pocketbase-mcp"]
     }
   }
 }
 ```
 
-### Authentication Methods
-
-**Option 1: Using Admin Token** (recommended)
-```json
-{
-  "env": {
-    "POCKETBASE_URL": "http://localhost:8090",
-    "POCKETBASE_TOKEN": "your-admin-token"
-  }
-}
-```
-
-**Option 2: Using Email/Password**
-```json
-{
-  "env": {
-    "POCKETBASE_URL": "http://localhost:8090",
-    "POCKETBASE_EMAIL": "admin@example.com",
-    "POCKETBASE_PASSWORD": "your-password"
-  }
-}
-```
+If `POCKETBASE_URL` is not set, server defaults to `http://localhost:8090`.
 
 ### Direct Usage
 
 ```bash
-# With environment variables
-POCKETBASE_URL=http://localhost:8090 \
-POCKETBASE_TOKEN=your-token \
+# Use default URL (http://localhost:8090)
 npx @fadlee/pocketbase-mcp
 
-# Or with Bun
-POCKETBASE_URL=http://localhost:8090 \
-POCKETBASE_TOKEN=your-token \
+# Or use custom PocketBase URL
+POCKETBASE_URL=https://pb.example.com \
 bunx @fadlee/pocketbase-mcp
 ```
+
+### Authentication Flow (via tools)
+
+Use tools to authenticate after server starts:
+
+1. `auth_admin` or `auth_user`
+2. `get_auth_status`
+3. `logout`
 
 ## Available Tools
 
@@ -83,6 +64,12 @@ bunx @fadlee/pocketbase-mcp
 - `health` - Check PocketBase server health status
 - `get_field_schema_reference` - Get field types documentation
 - `get_rules_reference` - Get API rules syntax reference
+
+### Authentication
+- `auth_admin` - Authenticate as admin/superuser
+- `auth_user` - Authenticate as auth collection user (email/username)
+- `get_auth_status` - Check current authentication status
+- `logout` - Clear authentication session
 
 ### Collections
 - `list_collections` - List all collections
@@ -128,12 +115,7 @@ bun run build
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `POCKETBASE_URL` | Yes | PocketBase server URL (e.g., `http://localhost:8090`) |
-| `POCKETBASE_TOKEN` | No* | Admin authentication token |
-| `POCKETBASE_EMAIL` | No* | Superuser email for authentication |
-| `POCKETBASE_PASSWORD` | No* | Superuser password for authentication |
-
-\* Either `POCKETBASE_TOKEN` or both `POCKETBASE_EMAIL` and `POCKETBASE_PASSWORD` must be provided.
+| `POCKETBASE_URL` | No | PocketBase server URL (default: `http://localhost:8090`) |
 
 ## License
 
