@@ -23,7 +23,8 @@
     "release:patch": "npm version patch && npm publish --access public && git push --follow-tags",
     "release:minor": "npm version minor && npm publish --access public && git push --follow-tags",
     "release:major": "npm version major && npm publish --access public && git push --follow-tags",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run build",
+    "inspect": "bunx @modelcontextprotocol/inspector bun run src/index.ts"
   },
   "keywords": [
     "pocketbase",
