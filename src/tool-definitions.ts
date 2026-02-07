@@ -1,7 +1,6 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
-export function getToolDefinitions(): Tool[] {
-  return [
+export const TOOL_DEFINITIONS = [
     {
       name: 'health',
       description: 'Check PocketBase server health status',
@@ -349,5 +348,10 @@ export function getToolDefinitions(): Tool[] {
         required: ['collection', 'id'],
       },
     },
-  ];
+  ] as const satisfies readonly Tool[];
+
+export type ToolName = (typeof TOOL_DEFINITIONS)[number]['name'];
+
+export function getToolDefinitions(): Tool[] {
+  return [...TOOL_DEFINITIONS];
 }

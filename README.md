@@ -111,6 +111,12 @@ bun run dev
 # Type check
 bun run typecheck
 
+# Run tests (builds dist first)
+bun run test
+
+# Run all checks (typecheck + tests)
+bun run check
+
 # Build for production
 bun run build
 ```

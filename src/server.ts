@@ -1,6 +1,7 @@
 import { HttpClient } from './http-client.js';
 import { getFieldSchemaReference } from './references/field-schema.js';
 import { getRulesReference } from './references/rules.js';
+import type { ToolName } from './tool-definitions.js';
 import type {
   Collection,
   CreateCollectionArgs,
@@ -17,16 +18,19 @@ import type {
 
 const RULE_KEYS = ['listRule', 'viewRule', 'createRule', 'updateRule', 'deleteRule'] as const;
 type RuleKey = (typeof RULE_KEYS)[number];
+type ToolHandler = (args: Record<string, unknown>) => Promise<unknown>;
 
 export class PocketBaseMCPServer {
   private http: HttpClient;
   private email?: string;
   private password?: string;
+  private toolHandlers: Record<ToolName, ToolHandler>;
 
   constructor(baseUrl: string, token?: string, email?: string, password?: string) {
     this.http = new HttpClient(baseUrl, token);
     this.email = email;
     this.password = password;
+    this.toolHandlers = this.createToolHandlers();
   }
 
   async initialize(): Promise<void> {
@@ -279,55 +283,38 @@ export class PocketBaseMCPServer {
     };
   }
 
-  async callTool(toolName: string, args: Record<string, unknown>): Promise<unknown> {
-    switch (toolName) {
-      case 'health':
-        return this.health();
-
-      case 'get_field_schema_reference':
-        return getFieldSchemaReference();
-
-      case 'list_collections':
-        return this.listCollections();
-
-      case 'view_collection':
-        return this.viewCollection(this.requireString(args.collection, 'collection'));
-
-      case 'create_collection':
-        return this.createCollection(this.parseCreateCollectionArgs(args));
-
-      case 'update_collection': {
+  private createToolHandlers(): Record<ToolName, ToolHandler> {
+    return {
+      health: async () => this.health(),
+      get_field_schema_reference: async () => getFieldSchemaReference(),
+      list_collections: async () => this.listCollections(),
+      view_collection: async (args) =>
+        this.viewCollection(this.requireString(args.collection, 'collection')),
+      create_collection: async (args) => this.createCollection(this.parseCreateCollectionArgs(args)),
+      update_collection: async (args) => {
         const parsed = this.parseUpdateCollectionArgs(args);
         return this.updateCollection(parsed.collection, parsed.data);
-      }
+      },
+      delete_collection: async (args) =>
+        this.deleteCollection(this.requireString(args.collection, 'collection')),
+      get_rules_reference: async () => getRulesReference(),
+      update_collection_rules: async (args) =>
+        this.updateCollectionRules(this.parseUpdateRulesArgs(args)),
+      list_records: async (args) => this.listRecords(this.parseListRecordsArgs(args)),
+      view_record: async (args) => this.viewRecord(this.parseViewRecordArgs(args)),
+      create_record: async (args) => this.createRecord(this.parseCreateRecordArgs(args)),
+      update_record: async (args) => this.updateRecord(this.parseUpdateRecordArgs(args)),
+      delete_record: async (args) => this.deleteRecord(this.parseDeleteRecordArgs(args)),
+    };
+  }
 
-      case 'delete_collection':
-        return this.deleteCollection(this.requireString(args.collection, 'collection'));
-
-      case 'get_rules_reference':
-        return getRulesReference();
-
-      case 'update_collection_rules':
-        return this.updateCollectionRules(this.parseUpdateRulesArgs(args));
-
-      case 'list_records':
-        return this.listRecords(this.parseListRecordsArgs(args));
-
-      case 'view_record':
-        return this.viewRecord(this.parseViewRecordArgs(args));
-
-      case 'create_record':
-        return this.createRecord(this.parseCreateRecordArgs(args));
-
-      case 'update_record':
-        return this.updateRecord(this.parseUpdateRecordArgs(args));
-
-      case 'delete_record':
-        return this.deleteRecord(this.parseDeleteRecordArgs(args));
-
-      default:
-        throw new Error(`Unknown tool: ${toolName}`);
+  async callTool(toolName: string, args: Record<string, unknown>): Promise<unknown> {
+    const handler = (this.toolHandlers as Record<string, ToolHandler | undefined>)[toolName];
+    if (!handler) {
+      throw new Error(`Unknown tool: ${toolName}`);
     }
+
+    return handler(args);
   }
 
   async health(): Promise<HealthResponse> {
