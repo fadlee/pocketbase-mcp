@@ -1,6 +1,6 @@
 {
   "name": "@fadlee/pocketbase-mcp",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "PocketBase MCP Server - Model Context Protocol server for PocketBase",
   "type": "module",
   "bin": {
