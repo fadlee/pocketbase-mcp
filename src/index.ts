@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
@@ -29,7 +29,7 @@ const pbServer = new PocketBaseMCPServer(
   POCKETBASE_PASSWORD
 );
 
-const server = new Server(
+const mcpServer = new McpServer(
   {
     name: 'pocketbase-mcp-server',
     version: '1.0.0',
@@ -41,6 +41,8 @@ const server = new Server(
     },
   }
 );
+
+const server = mcpServer.server;
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
@@ -97,7 +99,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 async function main() {
   await pbServer.initialize();
   const transport = new StdioServerTransport();
-  await server.connect(transport);
+  await mcpServer.connect(transport);
 }
 
 main().catch((error) => {
