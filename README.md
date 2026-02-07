@@ -117,6 +117,9 @@ bun run test
 # Run all checks (typecheck + tests)
 bun run check
 
+# Interactive release helper (bump, check, publish, push tag)
+bun run release
+
 # Build for production
 bun run build
 ```
