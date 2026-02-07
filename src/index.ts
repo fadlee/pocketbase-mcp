@@ -8,6 +8,7 @@ import {
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import { serializeError } from './errors.js';
 import { PocketBaseMCPServer } from './server.js';
 import { getToolDefinitions } from './tool-definitions.js';
 
@@ -61,12 +62,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       ],
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const serialized = serializeError(error);
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify({ error: message }, null, 2),
+          text: JSON.stringify({ error: serialized }, null, 2),
         },
       ],
       isError: true,
@@ -88,8 +89,8 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       contents: [content],
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(message);
+    const serialized = serializeError(error);
+    throw new Error(`[${serialized.type}] ${serialized.message}`);
   }
 });
 

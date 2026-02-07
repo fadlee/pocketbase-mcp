@@ -1,3 +1,5 @@
+import { ApiError, AuthError } from './errors.js';
+
 export class HttpClient {
   private baseUrl: string;
   private token: string | null;
@@ -54,7 +56,14 @@ export class HttpClient {
       options.body = JSON.stringify(data);
     }
 
-    const response = await fetch(url, options);
+    let response: Response;
+    try {
+      response = await fetch(url, options);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new ApiError(`Request failed: ${message}`, { details: { method, endpoint } });
+    }
+
     const text = await response.text();
 
     let decoded: T | { message?: string } | undefined;
@@ -68,7 +77,17 @@ export class HttpClient {
       const message =
         (decoded && typeof decoded === 'object' && 'message' in decoded && decoded.message) ||
         `HTTP error ${response.status}`;
-      throw new Error(message);
+      if (response.status === 401 || response.status === 403) {
+        throw new AuthError(message, {
+          statusCode: response.status,
+          details: { method, endpoint, response: decoded },
+        });
+      }
+
+      throw new ApiError(message, {
+        statusCode: response.status,
+        details: { method, endpoint, response: decoded },
+      });
     }
 
     return decoded as T;

@@ -1,0 +1,227 @@
+import type {
+  Collection,
+  CreateCollectionArgs,
+  CreateRecordArgs,
+  HealthResponse,
+  ListRecordsArgs,
+  ListResult,
+  PBRecord,
+  UpdateRecordArgs,
+  UpdateRulesArgs,
+  ViewRecordArgs,
+} from './types.js';
+import { ValidationError } from './errors.js';
+import { HttpClient } from './http-client.js';
+
+export class PocketBaseApi {
+  constructor(private readonly http: HttpClient) {}
+
+  async health(): Promise<HealthResponse> {
+    return this.http.request<HealthResponse>('GET', '/api/health');
+  }
+
+  async listCollections() {
+    const result = await this.http.request<ListResult<Collection>>('GET', '/api/collections');
+
+    return {
+      page: result.page,
+      perPage: result.perPage,
+      totalItems: result.totalItems,
+      totalPages: result.totalPages,
+      items: result.items.map((col) => ({
+        id: col.id,
+        name: col.name,
+        type: col.type,
+        fields: col.fields?.length || 0,
+        system: col.system || false,
+      })),
+    };
+  }
+
+  async viewCollection(collection: string): Promise<Collection> {
+    return this.http.request<Collection>('GET', `/api/collections/${encodeURIComponent(collection)}`);
+  }
+
+  async createCollection(data: CreateCollectionArgs): Promise<Collection> {
+    const payload: Record<string, unknown> = {
+      name: data.name,
+      type: data.type || 'base',
+      fields: data.fields || [],
+    };
+
+    for (const rule of ['listRule', 'viewRule', 'createRule', 'updateRule', 'deleteRule'] as const) {
+      if (data[rule] !== undefined) {
+        payload[rule] = data[rule];
+      }
+    }
+
+    if (data.indexes && data.indexes.length > 0) {
+      payload.indexes = data.indexes;
+    }
+
+    return this.http.request<Collection>('POST', '/api/collections', payload);
+  }
+
+  async updateCollection(collection: string, data: Record<string, unknown>): Promise<Collection> {
+    return this.http.request<Collection>(
+      'PATCH',
+      `/api/collections/${encodeURIComponent(collection)}`,
+      data
+    );
+  }
+
+  async deleteCollection(collection: string): Promise<{ message: string }> {
+    await this.http.request('DELETE', `/api/collections/${encodeURIComponent(collection)}`);
+    return { message: 'Collection deleted successfully' };
+  }
+
+  async updateCollectionRules(args: UpdateRulesArgs): Promise<{
+    message: string;
+    collection: string;
+    updatedRules: string[];
+    currentRules: Record<string, string | null>;
+  }> {
+    const { collection, ...rules } = args;
+    const payload: Record<string, unknown> = {};
+
+    for (const rule of ['listRule', 'viewRule', 'createRule', 'updateRule', 'deleteRule'] as const) {
+      if (rule in rules) {
+        payload[rule] = rules[rule];
+      }
+    }
+
+    if (Object.keys(payload).length === 0) {
+      return {
+        message: 'No rules specified to update',
+        collection,
+        updatedRules: [],
+        currentRules: {},
+      };
+    }
+
+    const result = await this.http.request<Collection>(
+      'PATCH',
+      `/api/collections/${encodeURIComponent(collection)}`,
+      payload
+    );
+
+    return {
+      message: 'Collection rules updated successfully',
+      collection,
+      updatedRules: Object.keys(payload),
+      currentRules: {
+        listRule: result.listRule ?? null,
+        viewRule: result.viewRule ?? null,
+        createRule: result.createRule ?? null,
+        updateRule: result.updateRule ?? null,
+        deleteRule: result.deleteRule ?? null,
+      },
+    };
+  }
+
+  async listRecords(args: ListRecordsArgs): Promise<ListResult<PBRecord>> {
+    const { collection, ...options } = args;
+    const query: Record<string, string | number> = {};
+
+    for (const key of ['page', 'perPage', 'sort', 'filter', 'expand', 'fields'] as const) {
+      if (options[key] !== undefined && options[key] !== null && options[key] !== '') {
+        query[key] = options[key]!;
+      }
+    }
+
+    return this.http.request<ListResult<PBRecord>>(
+      'GET',
+      `/api/collections/${encodeURIComponent(collection)}/records`,
+      null,
+      query
+    );
+  }
+
+  async viewRecord(args: ViewRecordArgs): Promise<PBRecord> {
+    const { collection, id, ...options } = args;
+    const query: Record<string, string | number> = {};
+
+    for (const key of ['expand', 'fields'] as const) {
+      if (options[key] !== undefined && options[key] !== null && options[key] !== '') {
+        query[key] = options[key]!;
+      }
+    }
+
+    return this.http.request<PBRecord>(
+      'GET',
+      `/api/collections/${encodeURIComponent(collection)}/records/${encodeURIComponent(id)}`,
+      null,
+      query
+    );
+  }
+
+  async createRecord(args: CreateRecordArgs): Promise<PBRecord> {
+    const { collection, data, expand } = args;
+    const query: Record<string, string | number> = {};
+
+    if (expand) {
+      query.expand = expand;
+    }
+
+    return this.http.request<PBRecord>(
+      'POST',
+      `/api/collections/${encodeURIComponent(collection)}/records`,
+      data,
+      query
+    );
+  }
+
+  async updateRecord(args: UpdateRecordArgs): Promise<PBRecord> {
+    const { collection, id, data, expand } = args;
+    const query: Record<string, string | number> = {};
+
+    if (expand) {
+      query.expand = expand;
+    }
+
+    return this.http.request<PBRecord>(
+      'PATCH',
+      `/api/collections/${encodeURIComponent(collection)}/records/${encodeURIComponent(id)}`,
+      data,
+      query
+    );
+  }
+
+  async deleteRecord(collection: string, id: string): Promise<{ message: string }> {
+    await this.http.request(
+      'DELETE',
+      `/api/collections/${encodeURIComponent(collection)}/records/${encodeURIComponent(id)}`
+    );
+    return { message: 'Record deleted successfully' };
+  }
+
+  async listResources(): Promise<
+    Array<{ uri: string; name: string; description: string; mimeType: string }>
+  > {
+    const collections = await this.listCollections();
+    const items = collections.items || [];
+
+    return items.map((col) => ({
+      uri: `pocketbase://collection/${col.name}`,
+      name: col.name,
+      description: `Collection: ${col.name} (type: ${col.type})`,
+      mimeType: 'application/json',
+    }));
+  }
+
+  async readResource(uri: string): Promise<{ uri: string; mimeType: string; text: string }> {
+    const match = uri.match(/^pocketbase:\/\/collection\/(.+)$/);
+    if (!match) {
+      throw new ValidationError('Invalid resource URI');
+    }
+
+    const collection = match[1];
+    const data = await this.viewCollection(collection);
+
+    return {
+      uri,
+      mimeType: 'application/json',
+      text: JSON.stringify(data, null, 2),
+    };
+  }
+}
