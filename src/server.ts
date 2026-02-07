@@ -10,37 +10,272 @@ import type {
   ListRecordsArgs,
   ListResult,
   PBRecord,
-  UpdateCollectionArgs,
   UpdateRecordArgs,
   UpdateRulesArgs,
   ViewRecordArgs,
 } from './types.js';
 
+const RULE_KEYS = ['listRule', 'viewRule', 'createRule', 'updateRule', 'deleteRule'] as const;
+type RuleKey = (typeof RULE_KEYS)[number];
+
 export class PocketBaseMCPServer {
   private http: HttpClient;
+  private email?: string;
+  private password?: string;
 
   constructor(baseUrl: string, token?: string, email?: string, password?: string) {
     this.http = new HttpClient(baseUrl, token);
-
-    if (!token && email && password) {
-      this.http.authenticate(email, password).catch((err) => {
-        console.error('Authentication failed:', err.message);
-      });
-    }
+    this.email = email;
+    this.password = password;
   }
 
   async initialize(): Promise<void> {
-    const config = this.getConfig();
-    if (!config.token && config.email && config.password) {
-      await this.http.authenticate(config.email, config.password);
+    if (!this.http.getToken() && this.email && this.password) {
+      await this.http.authenticate(this.email, this.password);
     }
   }
 
-  private getConfig() {
+  private isPlainObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  private requireString(value: unknown, parameter: string): string {
+    if (value === undefined || value === null) {
+      throw new Error(`Missing required parameter: ${parameter}`);
+    }
+
+    if (typeof value !== 'string' || value.trim() === '') {
+      throw new Error(`Invalid parameter: ${parameter} must be a non-empty string`);
+    }
+
+    return value;
+  }
+
+  private optionalString(value: unknown, parameter: string): string | undefined {
+    if (value === undefined) {
+      return undefined;
+    }
+
+    if (typeof value !== 'string') {
+      throw new Error(`Invalid parameter: ${parameter} must be a string`);
+    }
+
+    return value;
+  }
+
+  private optionalNullableString(
+    value: unknown,
+    parameter: string
+  ): string | null | undefined {
+    if (value === undefined) {
+      return undefined;
+    }
+
+    if (value === null) {
+      return null;
+    }
+
+    if (typeof value !== 'string') {
+      throw new Error(`Invalid parameter: ${parameter} must be a string or null`);
+    }
+
+    return value;
+  }
+
+  private assertObject(value: unknown, parameter: string): asserts value is Record<string, unknown> {
+    if (!this.isPlainObject(value)) {
+      throw new Error(`Invalid parameter: ${parameter} must be an object`);
+    }
+  }
+
+  private requireObject(value: unknown, parameter: string): Record<string, unknown> {
+    if (value === undefined || value === null) {
+      throw new Error(`Missing required parameter: ${parameter}`);
+    }
+
+    this.assertObject(value, parameter);
+    return value;
+  }
+
+  private assertObjectArray(value: unknown, parameter: string): asserts value is Record<string, unknown>[] {
+    if (!Array.isArray(value) || value.some((item) => !this.isPlainObject(item))) {
+      throw new Error(`Invalid parameter: ${parameter} must be an array of objects`);
+    }
+  }
+
+  private assertStringArray(value: unknown, parameter: string): asserts value is string[] {
+    if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) {
+      throw new Error(`Invalid parameter: ${parameter} must be an array of strings`);
+    }
+  }
+
+  private optionalInteger(value: unknown, parameter: string): number | undefined {
+    if (value === undefined) {
+      return undefined;
+    }
+
+    if (typeof value !== 'number' || !Number.isInteger(value)) {
+      throw new Error(`Invalid parameter: ${parameter} must be an integer`);
+    }
+
+    return value;
+  }
+
+  private readRuleValues(
+    source: Record<string, unknown>
+  ): Partial<Record<RuleKey, string | null>> {
+    const rules: Partial<Record<RuleKey, string | null>> = {};
+
+    for (const rule of RULE_KEYS) {
+      const value = this.optionalNullableString(source[rule], rule);
+      if (value !== undefined) {
+        rules[rule] = value;
+      }
+    }
+
+    return rules;
+  }
+
+  private parseCreateCollectionArgs(args: Record<string, unknown>): CreateCollectionArgs {
+    const name = this.requireString(args.name, 'name');
+    const fields = args.fields;
+    this.assertObjectArray(fields, 'fields');
+
+    const parsed: CreateCollectionArgs = {
+      name,
+      fields: fields as CreateCollectionArgs['fields'],
+      ...this.readRuleValues(args),
+    };
+
+    if (args.type !== undefined) {
+      if (args.type !== 'base' && args.type !== 'auth' && args.type !== 'view') {
+        throw new Error('Invalid parameter: type must be one of base, auth, or view');
+      }
+
+      parsed.type = args.type;
+    }
+
+    if (args.indexes !== undefined) {
+      this.assertStringArray(args.indexes, 'indexes');
+      parsed.indexes = args.indexes;
+    }
+
+    return parsed;
+  }
+
+  private parseUpdateCollectionArgs(args: Record<string, unknown>): {
+    collection: string;
+    data: Record<string, unknown>;
+  } {
+    const collection = this.requireString(args.collection, 'collection');
+    let data: Record<string, unknown>;
+
+    if (args.data === undefined) {
+      data = { ...args };
+      delete data.collection;
+    } else {
+      const nestedData = this.requireObject(args.data, 'data');
+      data = { ...nestedData };
+
+      for (const key of ['fields', 'indexes', ...RULE_KEYS] as const) {
+        if (key in args && !(key in data)) {
+          data[key] = args[key];
+        }
+      }
+    }
+
+    if (Object.keys(data).length === 0) {
+      throw new Error(
+        'Missing update payload. Provide update properties under data or at top-level (besides collection). For schema changes, send fields as the full fields array (existing fields + your changes).'
+      );
+    }
+
+    if ('fields' in data && data.fields !== undefined) {
+      this.assertObjectArray(data.fields, 'fields');
+    }
+
+    if ('indexes' in data && data.indexes !== undefined) {
+      this.assertStringArray(data.indexes, 'indexes');
+    }
+
+    for (const rule of RULE_KEYS) {
+      if (rule in data) {
+        this.optionalNullableString(data[rule], rule);
+      }
+    }
+
+    return { collection, data };
+  }
+
+  private parseUpdateRulesArgs(args: Record<string, unknown>): UpdateRulesArgs {
     return {
-      token: process.env.POCKETBASE_TOKEN,
-      email: process.env.POCKETBASE_EMAIL,
-      password: process.env.POCKETBASE_PASSWORD,
+      collection: this.requireString(args.collection, 'collection'),
+      ...this.readRuleValues(args),
+    };
+  }
+
+  private parseListRecordsArgs(args: Record<string, unknown>): ListRecordsArgs {
+    const parsed: ListRecordsArgs = {
+      collection: this.requireString(args.collection, 'collection'),
+    };
+
+    const page = this.optionalInteger(args.page, 'page');
+    if (page !== undefined) {
+      parsed.page = page;
+    }
+
+    const perPage = this.optionalInteger(args.perPage, 'perPage');
+    if (perPage !== undefined) {
+      parsed.perPage = perPage;
+    }
+
+    for (const key of ['sort', 'filter', 'expand', 'fields'] as const) {
+      const value = this.optionalString(args[key], key);
+      if (value !== undefined) {
+        parsed[key] = value;
+      }
+    }
+
+    return parsed;
+  }
+
+  private parseViewRecordArgs(args: Record<string, unknown>): ViewRecordArgs {
+    const parsed: ViewRecordArgs = {
+      collection: this.requireString(args.collection, 'collection'),
+      id: this.requireString(args.id, 'id'),
+    };
+
+    for (const key of ['expand', 'fields'] as const) {
+      const value = this.optionalString(args[key], key);
+      if (value !== undefined) {
+        parsed[key] = value;
+      }
+    }
+
+    return parsed;
+  }
+
+  private parseCreateRecordArgs(args: Record<string, unknown>): CreateRecordArgs {
+    return {
+      collection: this.requireString(args.collection, 'collection'),
+      data: this.requireObject(args.data, 'data'),
+      expand: this.optionalString(args.expand, 'expand'),
+    };
+  }
+
+  private parseUpdateRecordArgs(args: Record<string, unknown>): UpdateRecordArgs {
+    return {
+      collection: this.requireString(args.collection, 'collection'),
+      id: this.requireString(args.id, 'id'),
+      data: this.requireObject(args.data, 'data'),
+      expand: this.optionalString(args.expand, 'expand'),
+    };
+  }
+
+  private parseDeleteRecordArgs(args: Record<string, unknown>): DeleteRecordArgs {
+    return {
+      collection: this.requireString(args.collection, 'collection'),
+      id: this.requireString(args.id, 'id'),
     };
   }
 
@@ -56,80 +291,39 @@ export class PocketBaseMCPServer {
         return this.listCollections();
 
       case 'view_collection':
-        return this.viewCollection(args.collection as string);
+        return this.viewCollection(this.requireString(args.collection, 'collection'));
 
       case 'create_collection':
-        return this.createCollection(args as unknown as CreateCollectionArgs);
+        return this.createCollection(this.parseCreateCollectionArgs(args));
 
       case 'update_collection': {
-        const collection = args.collection as string;
-        if (!collection) {
-          throw new Error('Missing required parameter: collection');
-        }
-
-        let data = (args.data as Record<string, unknown>) || {};
-
-        if (!args.data) {
-          data = { ...args };
-          delete data.collection;
-        } else {
-          for (const k of [
-            'fields',
-            'indexes',
-            'listRule',
-            'viewRule',
-            'createRule',
-            'updateRule',
-            'deleteRule',
-          ]) {
-            if (k in args && !(k in data)) {
-              data[k] = args[k];
-            }
-          }
-        }
-
-        if (typeof data !== 'object' || data === null) {
-          throw new Error('Invalid parameter: data must be an object');
-        }
-
-        if (Object.keys(data).length === 0) {
-          throw new Error(
-            'Missing update payload. Provide update properties under data or at top-level (besides collection). For schema changes, send fields as the full fields array (existing fields + your changes).'
-          );
-        }
-
-        if ('fields' in data && !Array.isArray(data.fields)) {
-          throw new Error(
-            'Invalid payload: fields must be an array. For schema changes, send the full fields array (existing fields + your changes), not just a single new field.'
-          );
-        }
-
-        return this.updateCollection(collection, data);
+        const parsed = this.parseUpdateCollectionArgs(args);
+        return this.updateCollection(parsed.collection, parsed.data);
       }
 
       case 'delete_collection':
-        return this.deleteCollection(args.collection as string);
+        return this.deleteCollection(this.requireString(args.collection, 'collection'));
 
       case 'get_rules_reference':
         return getRulesReference();
 
       case 'update_collection_rules':
-        return this.updateCollectionRules(args as unknown as UpdateRulesArgs);
+        return this.updateCollectionRules(this.parseUpdateRulesArgs(args));
 
       case 'list_records':
-        return this.listRecords(args as unknown as ListRecordsArgs);
+        return this.listRecords(this.parseListRecordsArgs(args));
 
       case 'view_record':
-        return this.viewRecord(args as unknown as ViewRecordArgs);
+        return this.viewRecord(this.parseViewRecordArgs(args));
 
       case 'create_record':
-        return this.createRecord(args as unknown as CreateRecordArgs);
+        return this.createRecord(this.parseCreateRecordArgs(args));
 
       case 'update_record':
-        return this.updateRecord(args as unknown as UpdateRecordArgs);
+        return this.updateRecord(this.parseUpdateRecordArgs(args));
 
       case 'delete_record':
-        return this.deleteRecord(args as unknown as DeleteRecordArgs);
+        return this.deleteRecord(this.parseDeleteRecordArgs(args));
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -142,7 +336,7 @@ export class PocketBaseMCPServer {
 
   async listCollections() {
     const result = await this.http.request<ListResult<Collection>>('GET', '/api/collections');
-    
+
     return {
       page: result.page,
       perPage: result.perPage,

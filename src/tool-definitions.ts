@@ -69,23 +69,23 @@ export function getToolDefinitions(): Tool[] {
             },
           },
           listRule: {
-            type: 'string',
+            type: ['string', 'null'],
             description: 'List API rule (null=disallow, ""=allow all)',
           },
           viewRule: {
-            type: 'string',
+            type: ['string', 'null'],
             description: 'View API rule',
           },
           createRule: {
-            type: 'string',
+            type: ['string', 'null'],
             description: 'Create API rule',
           },
           updateRule: {
-            type: 'string',
+            type: ['string', 'null'],
             description: 'Update API rule',
           },
           deleteRule: {
-            type: 'string',
+            type: ['string', 'null'],
             description: 'Delete API rule',
           },
           indexes: {

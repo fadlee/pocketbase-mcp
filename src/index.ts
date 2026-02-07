@@ -75,12 +75,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
-  try {
-    const resources = await pbServer.listResources();
-    return { resources };
-  } catch (error) {
-    return { resources: [] };
-  }
+  const resources = await pbServer.listResources();
+  return { resources };
 });
 
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
