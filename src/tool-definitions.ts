@@ -11,6 +11,20 @@ export const TOOL_DEFINITIONS = [
       },
     },
     {
+      name: 'set_base_url',
+      description: 'Set PocketBase server URL for this MCP session and clear auth token',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            description: 'PocketBase base URL (http or https)',
+          },
+        },
+        required: ['url'],
+      },
+    },
+    {
       name: 'auth_admin',
       description: 'Authenticate as PocketBase admin/superuser',
       inputSchema: {

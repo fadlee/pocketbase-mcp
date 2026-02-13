@@ -138,12 +138,26 @@ test('supports meta tools happy path', async () => {
   const { server } = createServerWithMockRequest();
 
   const health = await server.callTool('health', {});
+  const updatedBase = await server.callTool('set_base_url', { url: 'https://pb.example.com/' });
+  const status = await server.callTool('get_auth_status', {});
   const fieldRef = await server.callTool('get_field_schema_reference', {});
   const rulesRef = await server.callTool('get_rules_reference', {});
 
   assert.equal(health.code, 200);
+  assert.equal(updatedBase.baseUrl, 'https://pb.example.com');
+  assert.equal(status.baseUrl, 'https://pb.example.com');
   assert.equal(fieldRef.description, 'PocketBase Collection Field Schema Reference');
   assert.equal(rulesRef.description, 'PocketBase API Rules and Filters Reference');
+});
+
+test('validates set_base_url arguments', async () => {
+  const { server } = createServerWithMockRequest();
+
+  await assert.rejects(() => server.callTool('set_base_url', {}), /Missing required parameter: url/);
+  await assert.rejects(
+    () => server.callTool('set_base_url', { url: 'ftp://example.com' }),
+    /Invalid parameter: url must use http or https/
+  );
 });
 
 test('rejects unknown tool names', async () => {

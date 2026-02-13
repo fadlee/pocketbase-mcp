@@ -1,4 +1,4 @@
-import { ApiError, AuthError } from './errors.js';
+import { ApiError, AuthError, ValidationError } from './errors.js';
 
 export class HttpClient {
   private baseUrl: string;
@@ -23,6 +23,22 @@ export class HttpClient {
 
   getBaseUrl(): string {
     return this.baseUrl;
+  }
+
+  setBaseUrl(baseUrl: string): void {
+    let parsed: URL;
+    try {
+      parsed = new URL(baseUrl);
+    } catch {
+      throw new ValidationError('Invalid parameter: url must be a valid URL');
+    }
+
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new ValidationError('Invalid parameter: url must use http or https');
+    }
+
+    this.baseUrl = parsed.toString().replace(/\/$/, '');
+    this.clearToken();
   }
 
   async request<T = unknown>(

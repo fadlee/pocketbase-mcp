@@ -1,67 +1,88 @@
-# PocketBase MCP Server
+# dynamic-pocketbase-mcp
 
-Model Context Protocol (MCP) server for PocketBase, enabling AI assistants to interact with your PocketBase backend.
+Dynamic Model Context Protocol (MCP) server for PocketBase. Connect your AI client once, then manage collections and records in any PocketBase project using runtime tools.
+
+## Why this server is different
+
+Many PocketBase MCP servers are static: they hardcode collection-specific behavior or require custom tool definitions per schema.
+
+`dynamic-pocketbase-mcp` is dynamic:
+- Uses collection-agnostic tools (`list_collections`, `list_records`, `create_record`, etc.)
+- Works across existing and newly created collections without regenerating server code
+- Exposes live PocketBase collections as MCP resources
 
 ## Features
 
-- 🔧 **18 Tools** for complete PocketBase management
-- 📚 **Collections**: Create, update, delete, and view collections
-- 📝 **Records**: Full CRUD operations with filtering, sorting, and pagination
-- 🔐 **Authentication**: Login/logout and check auth state via tools
-- 🔐 **Rules**: Manage API access control rules
-- 📖 **References**: Built-in field schema and rules reference
-- 🌐 **Resources**: Expose collections as MCP resources
+- 18 MCP tools for health, auth, collections, rules, and records
+- Collection lifecycle operations (create, update, delete, inspect)
+- Record CRUD with filters, sorting, pagination, and field selection
+- Session-based auth via tools (`auth_admin`, `auth_user`, `get_auth_status`, `logout`)
+- Built-in references for field schema and rules syntax
 
 ## Installation
 
 ```bash
-npm install @fadlee/pocketbase-mcp
+npm install dynamic-pocketbase-mcp
 # or
-bun install @fadlee/pocketbase-mcp
+bun install dynamic-pocketbase-mcp
 ```
 
-## Usage
+## Configure in an AI client
 
-### With Claude Desktop
+### Claude Desktop
 
 Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
 ```json
 {
   "mcpServers": {
-    "pocketbase": {
+    "dynamic-pocketbase": {
       "command": "npx",
-      "args": ["@fadlee/pocketbase-mcp"]
+      "args": ["-y", "dynamic-pocketbase-mcp"]
     }
   }
 }
 ```
 
-If `POCKETBASE_URL` is not set, server defaults to `http://localhost:8090`.
+If `POCKETBASE_URL` is not set, the server defaults to `http://localhost:8090`.
 
-### Direct Usage
+## Direct usage
 
 ```bash
 # Use default URL (http://localhost:8090)
-npx @fadlee/pocketbase-mcp
+npx -y dynamic-pocketbase-mcp
 
-# Or use custom PocketBase URL
+# Use custom PocketBase URL
 POCKETBASE_URL=https://pb.example.com \
-bunx @fadlee/pocketbase-mcp
+bunx dynamic-pocketbase-mcp
 ```
 
-### Authentication Flow (via tools)
+## Simple tutorial: chat with AI using this MCP
 
-Use tools to authenticate after server starts:
+After you configure your MCP client, open a chat and try prompts like this:
+
+1. "Set PocketBase URL to `https://pb.example.com`."
+2. "Check my PocketBase server health."
+3. "List all PocketBase collections."
+4. "Authenticate as admin with email `<your-email>` and password `<your-password>`."
+5. "Create a collection named `notes` with a required `title` text field."
+6. "Create a record in `notes` with title `First note`."
+7. "Show all records in `notes`, newest first."
+8. "Log out from PocketBase auth session."
+
+If those steps succeed, your AI can now manage schema and data through this MCP server.
+
+## Authentication flow (via tools)
 
 1. `auth_admin` or `auth_user`
 2. `get_auth_status`
 3. `logout`
 
-## Available Tools
+## Available tools
 
-### Health & Reference
+### Health and references
 - `health` - Check PocketBase server health status
+- `set_base_url` - Update PocketBase URL for current MCP session and clear auth token
 - `get_field_schema_reference` - Get field types documentation
 - `get_rules_reference` - Get API rules syntax reference
 
@@ -73,7 +94,7 @@ Use tools to authenticate after server starts:
 
 ### Collections
 - `list_collections` - List all collections
-- `view_collection` - View collection by name/ID
+- `view_collection` - View collection by name or ID
 - `create_collection` - Create new collection
 - `update_collection` - Update collection schema/settings
 - `delete_collection` - Delete collection
@@ -111,7 +132,7 @@ bun run release
 bun run build
 ```
 
-## Environment Variables
+## Environment variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|

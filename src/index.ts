@@ -19,7 +19,7 @@ const pbServer = new PocketBaseMCPServer(POCKETBASE_URL);
 
 const mcpServer = new McpServer(
   {
-    name: 'pocketbase-mcp-server',
+    name: 'dynamic-pocketbase-mcp',
     version: '1.0.0',
   },
   {

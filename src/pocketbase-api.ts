@@ -98,6 +98,15 @@ export class PocketBaseApi {
     };
   }
 
+  setBaseUrl(url: string) {
+    this.http.setBaseUrl(url);
+    return {
+      message: 'PocketBase URL updated. Re-authenticate if needed.',
+      baseUrl: this.http.getBaseUrl(),
+      authenticated: false,
+    };
+  }
+
   async health(): Promise<HealthResponse> {
     return this.http.request<HealthResponse>('GET', '/api/health');
   }
